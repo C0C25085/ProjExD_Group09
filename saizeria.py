@@ -114,6 +114,7 @@ def draw_game(screen: pg.Surface, bg_img: pg.Surface, aiming: Aiming) -> None:
     """ゲーム画面を表示する。"""
     screen.blit(bg_img, (0, 0))
     screen.blit(aiming.get_img(), aiming.get_rct())
+    
 
 
 def draw_clear(screen: pg.Surface, bg_img: pg.Surface) -> pg.Rect:
