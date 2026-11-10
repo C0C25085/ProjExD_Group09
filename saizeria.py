@@ -86,6 +86,15 @@ class Aiming:
     def shoot(self):
         self.exp_timer = 15#0.25秒だけ爆発の画像を表示
 
+    def get_name(self) -> str:
+        return self.name
+        
+    def get_img(self) -> pg.Surface:
+        return self.img
+        
+    def get_rct(self) -> pg.Rect:
+        return self.rct
+
 class Food:
     """
     食材に関するクラス
@@ -155,9 +164,6 @@ def recipefoodlist(foodlist_of_recipe: list) -> list:
             foodlist.append(Food(random.choice(allfood)))
         return foodlist
 
-        
-
-
 class Recipe:
     """
     レシピ管理クラス(廣嶋)
@@ -289,169 +295,125 @@ class Recipe:
         """
         self.select_newrecipe()
 
-
-
-class Recipe:
+    
+def draw_text(screen: pg.Surface, text: str, size: int, x: int, y: int) -> None:
     """
-    レシピ管理クラス(廣嶋)
+    文字を画面の中央に表示する。
     """
-    # 各レシピの難易度
-    STARS = {
-        "辛味チキン": 1,
-        "たらこソースパスタ": 2,
-        "マルゲリータ": 2,
-        "小エビのサラダ": 3,
-        "ハンバーグ": 3,
-        "ミラノ風ドリア": 4,
-        "若鳥のディアボラ": 4,
-    }
-
-    def __init__(self)-> None:
-        """
-        レシピとタイマーの初期設定を行う関数
-        引数 なし
-        戻り値：なし
-        """
-        self.name = ""
-        self.syokuzailist = []
-        self.stars = 1
-        self.time = 600  # タイマー初期値10秒 (600フレーム)
-        self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 24)
-        self.select_newrecipe()
-
-    def select_newrecipe(self)-> None:
-        """
-        レシピを選択し、タイマーをリセットする関数
-        引数：なし
-        戻り値：なし
-        """
-        self.name = random.choice(list(Food.recipes.keys()))    
-        self.syokuzailist = list(Food.recipes[self.name])
-        self.stars = Recipe.STARS.get(self.name, 1)
-        self.time = 600  # タイマーリセット
-
-    def update(self)-> None:
-        """
-        毎フレームタイマーを1減算する関数
-        引数：なし
-        戻り値：なし
-        """
-        self.time -= 1
-
-    def draw(self, screen: pg.Surface)-> None:
-        """
-        レシピ名、必要な食材画像、残り時間を画面上に描画する関数
-        引数 screen
-        戻り値：なし
-        """
-        bg_rect = pg.Rect(10, 5, 370, 130)
-        # レシピ表示背景の四角枠描画
-        pg.draw.rect(screen, (61, 38, 18), bg_rect, border_radius=15)
-        pg.draw.rect(screen, (212, 163, 89), bg_rect, width=4, border_radius=15)
-
-        # 星の数とレシピ名
-        text = self.font.render(f"【{'★' * self.stars}】 {self.name}", True, (255, 255, 255))
-        screen.blit(text, (20, 15))
-
-        # 必要な食材のミニ画像
-        x, y = 22, 45
-        for syokuzai in self.syokuzailist:
-            img = pg.transform.rotozoom(Food.foods[syokuzai], 0, 0.12)
-            screen.blit(img, (x, y))
-            x += img.get_width() + 10
-
-        # 残り秒数表示
-        timer_text = self.font.render(
-            f"残り時間: {self.get_timelimit():.1f}秒", True, (255, 230, 100)
-        )
-        screen.blit(timer_text, (24, 95))
-
-    def get_name(self) -> str:
-        """
-        現在のレシピ名を返すゲッター関数
-        引数：なし
-        戻り値：現在のレシピ名
-        """
-        return self.name
-
-    def get_syokuzailist(self) -> list[str]:
-        """
-        必要な食材リストを返すゲッター関数
-        引数：なし
-        戻り値：必要な食材名のリスト
-        """
-        return list(self.syokuzailist)
-
-    def get_stars(self) -> int:
-        """
-        レシピの星の数を返すゲッター関数
-        引数：なし
-        戻り値：難易度の星の数
-        """
-        return self.stars
-
-    def get_time(self) -> int:
-        """
-        現在の残りフレーム数を返すゲッター関数
-        引数：なし
-        戻り値：残りフレーム数
-        """
-        return self.time
-
-    def get_timelimit(self) -> float:
-        """
-        残り時間を秒数に換算して返すゲッター関数
-        引数：なし
-        戻り値：残り秒数
-        """
-        return max(0.0, self.time / 60)
-
-    def timeover(self) -> bool:
-        """
-        制限時間（タイマー）が終了したか判定する関数
-        引数：なし
-        戻り値：制限時間終了判定結果（終了：True／継続：False）
-        """
-        return self.time <= 0
-
-    def next_recipe(self)-> None:
-        """
-        次の新しいレシピに切り替える関数
-        引数：なし
-        戻り値：なし
-        """
-        self.select_newrecipe()
+    font = pg.font.SysFont(["meiryo", "yu gothic", "hiraginosans"], size)
+    img = font.render(text, True, GREEN)
+    rect = img.get_rect(center=(x, y))
+    screen.blit(img, rect)
 
 
+def draw_button(screen: pg.Surface, text: str, x: int, y: int, w: int, h: int) -> pg.Rect:
+    """
+    黄色のボタンを表示する。
+    """
+    rect = pg.Rect(x, y, w, h)
+
+    pg.draw.rect(screen, CREAM, rect)
+    pg.draw.rect(screen, DARK_GREEN, rect, 3)
+
+    draw_text(screen, text, 35, x + w // 2, y + h // 2)
+
+    return rect
+
+
+def draw_start(screen: pg.Surface, bg_img: pg.Surface) -> pg.Rect:
+    """スタート画面を表示する。"""
+    screen.blit(bg_img, (0, 0))
+
+    draw_text(screen, "サイゼリア", 60, 550, 220)
+
+    return draw_button(screen, "スタート", 400, 370, 300, 85)
+
+
+def draw_game(screen: pg.Surface, bg_img: pg.Surface, aiming: Aiming) -> None:
+    """ゲーム画面を表示する。"""
+    screen.blit(bg_img, (0, 0))
+    screen.blit(aiming.get_img(), aiming.get_rct())
+    
+
+
+def draw_clear(screen: pg.Surface, bg_img: pg.Surface) -> pg.Rect:
+    """クリア画面を表示する。"""
+    screen.blit(bg_img, (0, 0))
+
+    draw_text(screen, "クリア！", 60, 550, 200)
+    draw_text(screen, "料理が完成しました！", 32, 550, 280)
+
+    return draw_button(screen, "次へ", 425, 370, 250, 80)
+
+
+def draw_gameover(screen: pg.Surface, bg_img: pg.Surface) -> pg.Rect:
+    """ゲームオーバー画面を表示する。"""
+    screen.blit(bg_img, (0, 0))
+    draw_text(screen, "ゲームオーバー", 60, 550, 220)
+    draw_text(screen, "また挑戦してみよう！", 32, 550, 300)
+
+    return draw_button(screen, "リトライ", 400, 380, 300, 80)
+
+
+def draw_score(screen: pg.Surface, bg_img: pg.Surface, score: int, food_count: int) -> pg.Rect:
+    """最終スコア画面を表示する（完成料理の表示を削除）。"""
+    screen.blit(bg_img, (0, 0))
+
+    draw_text(screen, "最終スコア", 60, 550, 160)
+
+    # 2項目（スコア・集めた食材）に合わせて白枠とY座標を整列
+    pg.draw.rect(screen, WHITE, (300, 230, 500, 180))
+    pg.draw.rect(screen, GREEN, (300, 230, 500, 180), 3)
+
+    draw_text(screen, f"スコア：{score}", 35, 550, 285)
+    draw_text(screen, f"集めた食材：{food_count}個", 35, 550, 355)
+
+    return draw_button(screen, "タイトルに戻る", 375, 470, 350, 80)
+    
+    
 def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))
+    pg.display.set_caption("サイゼリア - 食材シューティング")
     bg_img = pg.image.load("fig/mori.png")
     bg_img = pg.transform.scale(bg_img, (WIDTH, HEIGHT))
-    clock = pg.time.Clock()
+    clock  = pg.time.Clock()
     aiming = Aiming()
 
+    pg.mixer.music.load("sound/kamatamago_C00003_heaven-and-hell.mp3")
+    pg.mixer.music.play(-1)
+    recipe_hyouji = Recipe()
     shot_sound = pg.mixer.Sound(SOUND_FILE) #効果音読み込み
     miss_shot_sound = pg.mixer.Sound(MISS_SOUND_FILE)
 
-    foodlist_of_recipe = recipe_hyouji.syokuzailist
-    Food.foodlist_of_recipe(foodlist_of_recipe)
-    
-    recipe_hyouji = Recipe()
+    foodlist_of_recipe = Food.recipes[recipe_hyouji.name]
+    foodlist = recipefoodlist(foodlist_of_recipe)
+
+    # 最初はスタート画面
+    game_state = START
+
+    # 最終スコア
+    score = 0
+    food_count = 0
+
+    button = None
 
     while True:
+        # イベント処理
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return
+
+            # ボタンをクリックしたとき
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_SPACE:
-                   hit_foods = []
-                   for food in foodlist:
+                    hit_foods = []
+                    for food in foodlist:
                         if aiming.rct.colliderect(food.rct): #照準と食材が重なっているか（大まか）
                             offset_x = food.rct.x - aiming.rct.x
                             offset_y = food.rct.y - aiming.rct.y #標準と食材はどれだけ離れているか
                             if aiming.mask.overlap(food.mask, (offset_x, offset_y)): #画像の色のついた部分同士が重なっているか
                                 hit_foods.append(food)      
-                   if  hit_foods:
+                    if  hit_foods:
                         aiming.shoot()  
                         if SE_MAXTIME is not None:
                             shot_sound.play(maxtime=SE_MAXTIME)
@@ -460,40 +422,70 @@ def main():
                         
                         for food in hit_foods:
                             foodlist.remove(food)  
-                   else:
+                    else:
                         if MISS_SE_MAXTIME is not None:
                             miss_shot_sound.play(maxtime=MISS_SE_MAXTIME)
                         else:
                             miss_shot_sound.play()
+            if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+                if button is not None and button.collidepoint(event.pos):
+                    if game_state == START:
+                        game_state = PLAYING
+                        score = 0
+                        food_count = 0
+
+                    elif game_state == CLEAR:
+                        game_state = SCORE
+
+                    elif game_state == GAMEOVER:
+                        game_state = PLAYING
+                        score = 0
+                        food_count = 0
+
+                    elif game_state == SCORE:
+                        game_state = START
+
+        button = None
+        if game_state == START:
+            button = draw_start(screen, bg_img)
+
+        elif game_state == PLAYING:
+            draw_game(screen, bg_img, aiming)
+            for food in foodlist:
+                food.update()
+                # judge.check_syokuzai(food.name)
+                screen.blit(food.img, food.rct)
+            
+            screen.blit(aiming.img,aiming.rct)
+        
+            # タイマー更新
+            recipe_hyouji.update()
+    
+            #タイムオーバーのとき
+            if recipe_hyouji.timeover():
+                foodlist = recipefoodlist(foodlist_of_recipe)  #時間が切れたら新しいレシピを表示
+                recipe_hyouji.next_recipe()
+    
+            # レシピ表示の描画
+            recipe_hyouji.draw(screen)
+
+            # if judge.get_status() == "CLEAR":  #マージ後有効化
+            #     foodlist = recipefoodlist(foodlist_of_recipe)
+            #     recipe_hyouji.next_recipe()  #完成したら次の食材に更新
+
+        elif game_state == CLEAR:
+            button = draw_clear(screen, bg_img)
+
+        elif game_state == GAMEOVER:
+            button = draw_gameover(screen, bg_img)
+
+        elif game_state == SCORE:
+            button = draw_score(screen, bg_img, score, food_count)
+
 
         key_lst = pg.key.get_pressed()
         aiming.update(key_lst)
 
-        # if judge.get_status() == "CLEAR":  #マージ後有効化
-        #     foodlist = recipefoodlist(foodlist_of_recipe)
-        #     recipe_hyouji.next_recipe()  #完成したら次の食材に更新
-            
-        screen.blit(bg_img, [0, 0])
-
-        for food in foodlist:
-            food.update()
-            # judge.check_syokuzai(food.name)
-            screen.blit(food.img, food.rct)
-        
-        screen.blit(aiming.img,aiming.rct)
-        # if recipe_hyouji.timeover():  #マージ後有効化
-        #     foodlist = recipefoodlist(foodlist_of_recipe)  #時間が切れたら新しいレシピを表示
-
-        # タイマー更新
-        recipe_hyouji.update()
-
-        #タイムオーバーのとき
-        if recipe_hyouji.timeover():
-            foodlist = recipefoodlist(foodlist_of_recipe)  #時間が切れたら新しいレシピを表示
-            recipe_hyouji.next_recipe()
-
-        # レシピ表示の描画
-        recipe_hyouji.draw(screen)
         pg.display.update()
         clock.tick(60)
 
