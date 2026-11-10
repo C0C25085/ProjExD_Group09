@@ -138,7 +138,7 @@ def main():
         screen.blit(bg_img, [0, 0])
 
         for food in foodlist:
-            #judge.check_syokuzai(food.name)
+            judge.check_syokuzai(food.name)
             screen.blit(food.img, food.rct)
         
         screen.blit(aiming.img,aiming.rct)
