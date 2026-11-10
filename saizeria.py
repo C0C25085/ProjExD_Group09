@@ -7,6 +7,22 @@ import pygame as pg
 
 WIDTH = 1100  # ゲームウィンドウの幅
 HEIGHT = 650  # ゲームウィンドウの高さ
+
+# 画面の状態
+START = "START"
+PLAYING = "PLAYING"
+CLEAR = "CLEAR"
+GAMEOVER = "GAMEOVER"
+SCORE = "SCORE"
+
+# 画面の色
+DARK_GREEN = (48, 91, 57)
+GREEN = (105, 153, 103)
+LIGHT_GREEN = (220, 241, 213)
+CREAM = (255, 225, 157)
+WHITE = (255, 255, 240)
+BROWN = (115, 91, 61)
+
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 SOUND_FILE = "sound/ピコッ.mp3"  # 効果音のファイル
