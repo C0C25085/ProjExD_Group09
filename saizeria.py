@@ -111,6 +111,7 @@ def main():
             
         screen.blit(bg_img, [0, 0])
         screen.blit(aiming.img,aiming.rct)
+
         score.update(screen)  #スコアを画面に表示
         time_mo = font.render(f"残り時間: {timeup:.1f}", True, (255, 255, 0))  #残り時間の文字
         time_rct = time_mo.get_rect()
