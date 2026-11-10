@@ -5,7 +5,6 @@ import sys
 import time
 import pygame as pg
 
-
 WIDTH = 1100  # ゲームウィンドウの幅
 HEIGHT = 650  # ゲームウィンドウの高さ
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -142,26 +141,286 @@ def recipefoodlist(foodlist_of_recipe: list) -> list:
 
         
 
+
+class Recipe:
+    """
+    レシピ管理クラス(廣嶋)
+    """
+    # 各レシピの難易度
+    STARS = {
+        "辛味チキン": 1,
+        "たらこソースパスタ": 2,
+        "マルゲリータ": 2,
+        "小エビのサラダ": 3,
+        "ハンバーグ": 3,
+        "ミラノ風ドリア": 4,
+        "若鳥のディアボラ": 4,
+    }
+
+    def __init__(self)-> None:
+        """
+        レシピとタイマーの初期設定を行う関数
+        引数 なし
+        戻り値：なし
+        """
+        self.name = ""
+        self.syokuzailist = []
+        self.stars = 1
+        self.time = 600  # タイマー初期値10秒 (600フレーム)
+        self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 24)
+        self.select_newrecipe()
+
+    def select_newrecipe(self)-> None:
+        """
+        レシピを選択し、タイマーをリセットする関数
+        引数：なし
+        戻り値：なし
+        """
+        self.name = random.choice(list(Food.recipes.keys()))    
+        self.syokuzailist = list(Food.recipes[self.name])
+        self.stars = Recipe.STARS.get(self.name, 1)
+        self.time = 600  # タイマーリセット
+
+    def update(self)-> None:
+        """
+        毎フレームタイマーを1減算する関数
+        引数：なし
+        戻り値：なし
+        """
+        self.time -= 1
+
+    def draw(self, screen: pg.Surface)-> None:
+        """
+        レシピ名、必要な食材画像、残り時間を画面上に描画する関数
+        引数 screen
+        戻り値：なし
+        """
+        bg_rect = pg.Rect(10, 5, 370, 130)
+        # レシピ表示背景の四角枠描画
+        pg.draw.rect(screen, (61, 38, 18), bg_rect, border_radius=15)
+        pg.draw.rect(screen, (212, 163, 89), bg_rect, width=4, border_radius=15)
+
+        # 星の数とレシピ名
+        text = self.font.render(f"【{'★' * self.stars}】 {self.name}", True, (255, 255, 255))
+        screen.blit(text, (20, 15))
+
+        # 必要な食材のミニ画像
+        x, y = 22, 45
+        for syokuzai in self.syokuzailist:
+            img = pg.transform.rotozoom(Food.foods[syokuzai], 0, 0.12)
+            screen.blit(img, (x, y))
+            x += img.get_width() + 10
+
+        # 残り秒数表示
+        timer_text = self.font.render(
+            f"残り時間: {self.get_timelimit():.1f}秒", True, (255, 230, 100)
+        )
+        screen.blit(timer_text, (24, 95))
+
+    def get_name(self) -> str:
+        """
+        現在のレシピ名を返すゲッター関数
+        引数：なし
+        戻り値：現在のレシピ名
+        """
+        return self.name
+
+    def get_syokuzailist(self) -> list[str]:
+        """
+        必要な食材リストを返すゲッター関数
+        引数：なし
+        戻り値：必要な食材名のリスト
+        """
+        return list(self.syokuzailist)
+
+    def get_stars(self) -> int:
+        """
+        レシピの星の数を返すゲッター関数
+        引数：なし
+        戻り値：難易度の星の数
+        """
+        return self.stars
+
+    def get_time(self) -> int:
+        """
+        現在の残りフレーム数を返すゲッター関数
+        引数：なし
+        戻り値：残りフレーム数
+        """
+        return self.time
+
+    def get_timelimit(self) -> float:
+        """
+        残り時間を秒数に換算して返すゲッター関数
+        引数：なし
+        戻り値：残り秒数
+        """
+        return max(0.0, self.time / 60)
+
+    def timeover(self) -> bool:
+        """
+        制限時間（タイマー）が終了したか判定する関数
+        引数：なし
+        戻り値：制限時間終了判定結果（終了：True／継続：False）
+        """
+        return self.time <= 0
+
+    def next_recipe(self)-> None:
+        """
+        次の新しいレシピに切り替える関数
+        引数：なし
+        戻り値：なし
+        """
+        self.select_newrecipe()
+
+
+
+class Recipe:
+    """
+    レシピ管理クラス(廣嶋)
+    """
+    # 各レシピの難易度
+    STARS = {
+        "辛味チキン": 1,
+        "たらこソースパスタ": 2,
+        "マルゲリータ": 2,
+        "小エビのサラダ": 3,
+        "ハンバーグ": 3,
+        "ミラノ風ドリア": 4,
+        "若鳥のディアボラ": 4,
+    }
+
+    def __init__(self)-> None:
+        """
+        レシピとタイマーの初期設定を行う関数
+        引数 なし
+        戻り値：なし
+        """
+        self.name = ""
+        self.syokuzailist = []
+        self.stars = 1
+        self.time = 600  # タイマー初期値10秒 (600フレーム)
+        self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 24)
+        self.select_newrecipe()
+
+    def select_newrecipe(self)-> None:
+        """
+        レシピを選択し、タイマーをリセットする関数
+        引数：なし
+        戻り値：なし
+        """
+        self.name = random.choice(list(Food.recipes.keys()))    
+        self.syokuzailist = list(Food.recipes[self.name])
+        self.stars = Recipe.STARS.get(self.name, 1)
+        self.time = 600  # タイマーリセット
+
+    def update(self)-> None:
+        """
+        毎フレームタイマーを1減算する関数
+        引数：なし
+        戻り値：なし
+        """
+        self.time -= 1
+
+    def draw(self, screen: pg.Surface)-> None:
+        """
+        レシピ名、必要な食材画像、残り時間を画面上に描画する関数
+        引数 screen
+        戻り値：なし
+        """
+        bg_rect = pg.Rect(10, 5, 370, 130)
+        # レシピ表示背景の四角枠描画
+        pg.draw.rect(screen, (61, 38, 18), bg_rect, border_radius=15)
+        pg.draw.rect(screen, (212, 163, 89), bg_rect, width=4, border_radius=15)
+
+        # 星の数とレシピ名
+        text = self.font.render(f"【{'★' * self.stars}】 {self.name}", True, (255, 255, 255))
+        screen.blit(text, (20, 15))
+
+        # 必要な食材のミニ画像
+        x, y = 22, 45
+        for syokuzai in self.syokuzailist:
+            img = pg.transform.rotozoom(Food.foods[syokuzai], 0, 0.12)
+            screen.blit(img, (x, y))
+            x += img.get_width() + 10
+
+        # 残り秒数表示
+        timer_text = self.font.render(
+            f"残り時間: {self.get_timelimit():.1f}秒", True, (255, 230, 100)
+        )
+        screen.blit(timer_text, (24, 95))
+
+    def get_name(self) -> str:
+        """
+        現在のレシピ名を返すゲッター関数
+        引数：なし
+        戻り値：現在のレシピ名
+        """
+        return self.name
+
+    def get_syokuzailist(self) -> list[str]:
+        """
+        必要な食材リストを返すゲッター関数
+        引数：なし
+        戻り値：必要な食材名のリスト
+        """
+        return list(self.syokuzailist)
+
+    def get_stars(self) -> int:
+        """
+        レシピの星の数を返すゲッター関数
+        引数：なし
+        戻り値：難易度の星の数
+        """
+        return self.stars
+
+    def get_time(self) -> int:
+        """
+        現在の残りフレーム数を返すゲッター関数
+        引数：なし
+        戻り値：残りフレーム数
+        """
+        return self.time
+
+    def get_timelimit(self) -> float:
+        """
+        残り時間を秒数に換算して返すゲッター関数
+        引数：なし
+        戻り値：残り秒数
+        """
+        return max(0.0, self.time / 60)
+
+    def timeover(self) -> bool:
+        """
+        制限時間（タイマー）が終了したか判定する関数
+        引数：なし
+        戻り値：制限時間終了判定結果（終了：True／継続：False）
+        """
+        return self.time <= 0
+
+    def next_recipe(self)-> None:
+        """
+        次の新しいレシピに切り替える関数
+        引数：なし
+        戻り値：なし
+        """
+        self.select_newrecipe()
+
+
 def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("fig/mori.png")
     bg_img = pg.transform.scale(bg_img, (WIDTH, HEIGHT))
-    clock  = pg.time.Clock()
+    clock = pg.time.Clock()
     aiming = Aiming()
 
     shot_sound = pg.mixer.Sound(SOUND_FILE) #効果音読み込み
     miss_shot_sound = pg.mixer.Sound(MISS_SOUND_FILE)
 
-    foodlist = []
-
-    recipe = random.choice(list(Food.recipes.keys()))  
-    allfood = list(Food.foods.keys())
-    need = Food.recipes[recipe]
-    for i in need:
-        foodlist.append(Food(i))
-    for n in range(10):
-        foodlist.append(Food(random.choice(allfood)))
+    foodlist_of_recipe = recipe_hyouji.syokuzailist
+    Food.foodlist_of_recipe(foodlist_of_recipe)
     
+    recipe_hyouji = Recipe()
 
     while True:
         for event in pg.event.get():
@@ -208,10 +467,21 @@ def main():
         screen.blit(aiming.img,aiming.rct)
         # if recipe_hyouji.timeover():  #マージ後有効化
         #     foodlist = recipefoodlist(foodlist_of_recipe)  #時間が切れたら新しいレシピを表示
+
+        # タイマー更新
+        recipe_hyouji.update()
+
+        #タイムオーバーのとき
+        if recipe_hyouji.timeover():
+            foodlist = recipefoodlist(foodlist_of_recipe)  #時間が切れたら新しいレシピを表示
+            recipe_hyouji.next_recipe()
+
+        # レシピ表示の描画
+        recipe_hyouji.draw(screen)
         pg.display.update()
-        clock.tick(60)       
-        
-        
+        clock.tick(60)
+
+
 if __name__ == "__main__":
     pg.init()
     pg.mixer.init()
