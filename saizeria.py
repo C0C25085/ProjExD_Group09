@@ -48,7 +48,7 @@ def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
 
 class Aiming:
     """
-    照準クラス
+    照準クラス(仮追加後)
     """
     def __init__(self):
         self.normal_img = pg.image.load("fig/syoujyun.png")
@@ -295,6 +295,69 @@ class Recipe:
         """
         self.select_newrecipe()
 
+class Judgment:
+    """
+    正誤判定を行うクラス(川辺)
+    """
+    def __init__(self, recipe):
+        self.motteru_syokuzai = []  # 取得した食材のリスト
+        self.status = "PLAYING"  # "PLAYING", "CLEAR", "BURNT"
+        self.recipe = recipe
+
+    def get_motteru_syokuzai(self):
+        """
+        取得した食材のリストの取得
+        """
+        return self.motteru_syokuzai
+
+    def get_status(self):
+        """
+        現在のゲームのステータスを取得
+        """
+        return self.status
+
+    def get_recipe(self):
+        """
+        現在のレシピ取得
+        """
+        return self.recipe
+
+    def set_recipe(self, recipe):
+        """
+        次のレシピへ更新
+        """
+        self.recipe = recipe
+        self.motteru_syokuzai.clear()
+        self.status = "PLAYING"
+
+    def check_syokuzai(self, syokuzai_name):
+        """
+        撃ち落とした食材の正誤を判定
+        """
+        if self.status != "PLAYING":
+            return
+
+        nerau_syokuzai = self.recipe.get_syokuzailist()  # 狙う食材を定義(川辺)
+
+        # 黒焦げを残すならコメントアウトしない
+        # if syokuzai_name not in nerau_syokuzai:
+        #     self.status = "BURNT"
+        #     return
+
+        self.motteru_syokuzai.append(syokuzai_name)  # ゲットした食材を追加
+
+        if self.is_recipe_completed(nerau_syokuzai):
+            self.status = "CLEAR"
+
+    def is_recipe_completed(self, nerau_syokuzai):
+        """
+        レシピの必要食材がすべて集まったか判定
+        """
+        for item in set(nerau_syokuzai):
+            if self.motteru_syokuzai.count(item) < nerau_syokuzai.count(item):
+                return False
+        return True   
+
     
 def draw_text(screen: pg.Surface, text: str, size: int, x: int, y: int) -> None:
     """
@@ -396,9 +459,17 @@ def main():
     food_count = 0
 
     button = None
+    recipe_hyouji = Recipe()
+    #score = Score()
+    judge = Judgment(recipe_hyouji) #(川辺)
+    time_limit = 30  
+    start= pg.time.get_ticks()  
+    font = pg.font.Font(None, 50)
 
     while True:
         # イベント処理
+        nokori = (pg.time.get_ticks() - start) / 1000
+        timeup = max(0.0, time_limit - nokori)
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return
@@ -421,12 +492,21 @@ def main():
                             shot_sound.play()
                         
                         for food in hit_foods:
+                            judge.check_syokuzai(food.name)
                             foodlist.remove(food)  
+                            
                     else:
                         if MISS_SE_MAXTIME is not None:
                             miss_shot_sound.play(maxtime=MISS_SE_MAXTIME)
                         else:
                             miss_shot_sound.play()
+                # レシピの判定（CLEARならスコア加算） (川辺↓)
+            if judge.get_status() == "CLEAR":
+                # 難易度(星の数) × 100点 を加算
+                score.value += recipe_hyouji.get_stars() * 100 
+                recipe_hyouji.next_recipe()      # 次のレシピへ
+                judge.set_recipe(recipe_hyouji)  # 判定も次のレシピへ更新
+
             if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
                 if button is not None and button.collidepoint(event.pos):
                     if game_state == START:
