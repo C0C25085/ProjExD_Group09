@@ -415,7 +415,7 @@ def draw_gameover(screen: pg.Surface, bg_img: pg.Surface) -> pg.Rect:
     draw_text(screen, "ゲームオーバー", 60, 550, 220)
     draw_text(screen, "また挑戦してみよう！", 32, 550, 300)
 
-    return draw_button(screen, "リトライ", 400, 380, 300, 80)
+    return draw_button(screen, "リトライ", 200, 380, 300, 80), draw_button(screen, "スコアを表示", 600, 380, 300, 80)
 
 
 def draw_score(screen: pg.Surface, bg_img: pg.Surface, score: int, food_count: int) -> pg.Rect:
@@ -434,6 +434,39 @@ def draw_score(screen: pg.Surface, bg_img: pg.Surface, score: int, food_count: i
     return draw_button(screen, "タイトルに戻る", 375, 470, 350, 80)
     
     
+
+#書き足したスコアクラス
+class Score:
+    """
+    スコアクラス
+    引数:なし
+    戻り値:なし
+    """
+    def __init__(self):
+        self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 50) #スコア用のフォント・初期値・描画位置の設定
+        self.color = (255, 0, 0)
+        self.value = 0 #スコアの初期値
+        self.img = self.fonto.render(f"スコア:{self.value}", 0, self.color)
+        self.rct = self.img.get_rect()
+        self.rct.center = (100, HEIGHT - 50) #画面左下に配置
+
+    def update(self, screen: pg.Surface): #スコアの数値を毎フレーム更新して画面に描画
+        self.img = self.fonto.render(f"スコア:{self.value}", 0, self.color)
+        screen.blit(self.img, self.rct)
+
+
+#書き足したゲームオーバークラス
+def gameover(screen: pg.Surface) -> None:
+    """
+    ゲームオーバークラス
+    引数:screen
+    戻り値:なし
+    """
+    jimg = pg.image.load("fig/jikan_gire.png")#画像を読み込む
+    jimg = pg.transform.scale(jimg, (WIDTH, HEIGHT))#画面のサイズに合わせて拡大・縮小
+    screen.blit(jimg, [0, 0])#画面の左上に貼り付ける
+
+
 def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     pg.display.set_caption("サイゼリア - 食材シューティング")
@@ -460,11 +493,16 @@ def main():
 
     button = None
     recipe_hyouji = Recipe()
-    #score = Score()
     judge = Judgment(recipe_hyouji) #(川辺)
     time_limit = 30  
     start= pg.time.get_ticks()  
     font = pg.font.Font(None, 50)
+    #スコアとタイマー設定↓
+    score = Score()
+    time_limit = 3  #制限時間
+    start= pg.time.get_ticks()  # 開始時の時間
+    font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 50)
+    #スコアとタイマー設定↑
 
     while True:
         # イベント処理
@@ -511,7 +549,7 @@ def main():
                 if button is not None and button.collidepoint(event.pos):
                     if game_state == START:
                         game_state = PLAYING
-                        score = 0
+                        score.value = 0
                         food_count = 0
 
                     elif game_state == CLEAR:
@@ -519,7 +557,7 @@ def main():
 
                     elif game_state == GAMEOVER:
                         game_state = PLAYING
-                        score = 0
+                        score.value = 0
                         food_count = 0
 
                     elif game_state == SCORE:
@@ -560,7 +598,22 @@ def main():
             button = draw_gameover(screen, bg_img)
 
         elif game_state == SCORE:
-            button = draw_score(screen, bg_img, score, food_count)
+            button = draw_score(screen, bg_img, score.value, food_count)
+
+        #ゲームオーバー画面↓
+        if timeup <= 0:
+
+            gameover(screen)
+            buttun = draw_gameover(screen, bg_img)
+            pg.display.update()
+            # time.sleep(5) #5秒待機
+            # return
+
+        score.update(screen)  #スコアを画面に表示
+        time_mo = font.render(f"残り時間: {timeup:.1f}", True, (255, 255, 0))  #残り時間の文字
+        time_rct = time_mo.get_rect()
+        time_rct.center = (WIDTH - 190, HEIGHT - 50)
+        screen.blit(time_mo, time_rct) # 残り時間を画面に表示
 
 
         key_lst = pg.key.get_pressed()
