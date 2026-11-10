@@ -8,7 +8,7 @@
 * 食材を獲得して、あなただけのサイゼリアを作ろう！
 * プレイヤーは照準を操作して空中を漂う食材を撃ち落とし、画面左上に表示されるレシピに必要な食材を集める。制限時間内に料理を完成させることでスコアを獲得し、たくさん完成させることでより豪華なサイゼリアメニューの完成を目指すシューティングゲームである。
 * 参考URL：[サイゼリヤ](https://www.saizeriya.co.jp/)
-* BGM：[Kamatamago (https://kamatamago.com)]Kamatamago (https://kamatamago.com)
+* BGM：[Kamatamago (https://kamatamago.com)](https://kamatamago.com)
 
 ## ゲームの遊び方
 * 矢印キーで照準を操作し、スぺスキーで射撃することで食材を獲得
