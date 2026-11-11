@@ -27,13 +27,11 @@ BROWN = (115, 91, 61)
 #効果音
 SOUND_FILE = "sound/ピコッ.mp3"  # 効果音のファイル
 SE_MAXTIME = 500 #効果音の長さ
+MISS_SOUND_FILE = "sound/パフ.mp3"  # 外れた時の効果音
+MISS_SE_MAXTIME = 300
 # BGM
 BGM1 = "sound/kamatamago_C00003_heaven-and-hell.mp3"
 BGM2 = "sound/kamatamago_C00011_Chopin_op9-2-Nocturne.mp3"
-
-MISS_SOUND_FILE = "sound/パフ.mp3"  # 外れた時の効果音
-MISS_SE_MAXTIME = 300
-
 
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
     """
