@@ -32,6 +32,7 @@ MISS_SE_MAXTIME = 300
 # BGM
 BGM1 = "sound/kamatamago_C00003_heaven-and-hell.mp3"
 BGM2 = "sound/kamatamago_C00011_Chopin_op9-2-Nocturne.mp3"
+BGM3 = "sound/kamatamago_C00017_The-Four-Seasons_La-Primavera_1_Allegro.mp3"
 
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
     """
@@ -202,7 +203,7 @@ class Recipe:
         self.name = random.choice(list(Food.recipes.keys()))    
         self.syokuzailist = list(Food.recipes[self.name])
         self.stars = Recipe.STARS.get(self.name, 1)
-        self.time = 600  # タイマーリセット
+        self.time = 900  # タイマーリセット
 
     def update(self)-> None:
         """
@@ -233,7 +234,7 @@ class Recipe:
             if syokuzai =="koukaton":
                 img = pg.transform.rotozoom(Food.foods[syokuzai], 0, 0.7)
             elif syokuzai == "Wsosu":
-                img = pg.transform.rotozoom(Food.foods[syokuzai], 0, 0.1)
+                img = pg.transform.rotozoom(Food.foods[syokuzai], 0, 0.06)
             else:
                 img = pg.transform.rotozoom(Food.foods[syokuzai], 0, 0.12)
             screen.blit(img, (x, y))
@@ -474,22 +475,19 @@ def main():
     bg_img = pg.transform.scale(bg_img, (WIDTH, HEIGHT))
     clock  = pg.time.Clock()
     aiming = Aiming()
-    recipe_hyouji = Recipe()
     shot_sound = pg.mixer.Sound(SOUND_FILE)  # 効果音読み込み
     miss_shot_sound = pg.mixer.Sound(MISS_SOUND_FILE)
-    foodlist_of_recipe = Food.recipes[recipe_hyouji.name]  # 食材生成
-    foodlist = recipefoodlist(foodlist_of_recipe)
     game_state = START # 最初はスタート画面
-    score = 0 # 最終スコア
     food_count = 0
     button = None
     retrybtn = None
     scorebtn = None
-    recipe_hyouji = Recipe()
-    judge = Judgment(recipe_hyouji)  # (川辺)
     time_limit = 30
     start = None
-    font = pg.font.Font(None, 50)
+    recipe_hyouji = Recipe()
+    foodlist_of_recipe = Food.recipes[recipe_hyouji.name]  # 食材生成
+    foodlist = recipefoodlist(foodlist_of_recipe)
+    judge = Judgment(recipe_hyouji)  # (川辺)  
     score = Score()
     font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 50)
     
@@ -548,27 +546,24 @@ def main():
                         game_state = PLAYING
                         score.value = 0
                         food_count = 0
-                        start = pg.time.get_ticks()  # 開始時の時間
+                        recipe_hyouji = Recipe()
+                        foodlist_of_recipe = Food.recipes[recipe_hyouji.name]  # 食材生成
+                        foodlist = recipefoodlist(foodlist_of_recipe)
+                        judge = Judgment(recipe_hyouji)  # (川辺)
                         pg.mixer.music.load(BGM1)  # BGM開始
-                        pg.mixer.music.play(-1)  
+                        pg.mixer.music.play(-1)
+                        start = pg.time.get_ticks()  # 開始時の時間 
                     # ゲーム終了後画面            
                     elif game_state == CLEAR:
                         game_state = SCORE
-                        pg.mixer.music.load(BGM2)  # BGM開始
-                        pg.mixer.music.play(-1) 
                     elif game_state == SCORE:
                         game_state = START 
+                        start = None
                 if game_state == GAMEOVER:
-                    # リトライボタンが押されたらスコアと時間をリセットしてゲームを始める
+                    # リトライボタンが押されたらスタート画面に戻る
                     if retrybtn.collidepoint(event.pos):
-                        game_state = PLAYING
-                        score.value = 0
-                        food_count = 0
-                        timeup = time_limit
-                        pg.mixer.music.load(BGM1)  # BGM開始
-                        pg.mixer.music.play(-1)
-                        start = pg.time.get_ticks()
-                        
+                        game_state = START
+                        start = None                        
                     # スコアボタンが押されたらスコアを表示する
                     if scorebtn.collidepoint(event.pos):
                         game_state = SCORE
@@ -606,13 +601,18 @@ def main():
             button = draw_score(screen, bg_img, score.value, food_count)
         # ゲームオーバー画面↓
         if game_state == PLAYING and timeup <= 0:          
-            # button = draw_gameover(screen, bg_img)
             gameover(screen)  # 時間切れ画像の表示
             pg.display.update()
-            pg.time.wait(2000)  #2秒停止
-            pg.mixer.music.load(BGM2)  # BGM開始
-            pg.mixer.music.play(-1)
-            game_state = GAMEOVER 
+            pg.time.wait(2000)  #2秒停止 
+            if score.value == 0:
+                pg.mixer.music.load(BGM2)  # BGM開始
+                pg.mixer.music.play(-1)
+                game_state = GAMEOVER
+            else:
+                game_state = CLEAR 
+                pg.mixer.music.load(BGM3)  # BGM開始
+                pg.mixer.music.play(-1)
+                
 
         key_lst = pg.key.get_pressed()
         aiming.update(key_lst)
