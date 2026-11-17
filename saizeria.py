@@ -547,6 +547,7 @@ def main():
                         score.value = 0
                         food_count = 0
                         recipe_hyouji = Recipe()
+                        aiming = Aiming()
                         foodlist_of_recipe = Food.recipes[recipe_hyouji.name]  # 食材生成
                         foodlist = recipefoodlist(foodlist_of_recipe)
                         judge = Judgment(recipe_hyouji)  # (川辺)
@@ -585,10 +586,10 @@ def main():
             screen.blit(time_mo, time_rct)  # 残り時間を画面に表示
 
             # タイムオーバーのとき
-            if recipe_hyouji.timeover():
+            if recipe_hyouji.timeover():# 時間が切れたら新しいレシピの表示
                 recipe_hyouji.next_recipe()
                 foodlist_of_recipe = Food.recipes[recipe_hyouji.name]
-                foodlist = recipefoodlist(foodlist_of_recipe)  # 時間が切れたら新しいレシピを表示
+                foodlist = recipefoodlist(foodlist_of_recipe)  
                 
             # レシピ表示の描画
             recipe_hyouji.draw(screen)
